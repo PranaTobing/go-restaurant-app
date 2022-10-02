@@ -9,8 +9,8 @@ import (
 func main() {
 	e := echo.New()
 
-	e.GET("/menu/food", get_food_menu)
-	e.GET("/menu/drinks", get_drinks_menu)
+	e.GET("/menu/food", getFoodMenu)
+	e.GET("/menu/drinks", getDrinksMenu)
 
 	e.Logger.Fatal(e.Start((":14045")))
 }
@@ -21,8 +21,8 @@ type MenuItem struct {
 	Price     int64
 }
 
-func get_food_menu(c echo.Context) error {
-	food_menu := []MenuItem{
+func getFoodMenu(c echo.Context) error {
+	foodMenu := []MenuItem{
 		{
 			Name:      "Bakmie",
 			OrderCode: "bakmie",
@@ -36,12 +36,12 @@ func get_food_menu(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data": food_menu,
+		"data": foodMenu,
 	})
 }
 
-func get_drinks_menu(c echo.Context) error {
-	drinks_menu := []MenuItem{
+func getDrinksMenu(c echo.Context) error {
+	drinksMenu := []MenuItem{
 		{
 			Name:      "Es Teh",
 			OrderCode: "es_teh",
@@ -65,6 +65,6 @@ func get_drinks_menu(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data": drinks_menu,
+		"data": drinksMenu,
 	})
 }

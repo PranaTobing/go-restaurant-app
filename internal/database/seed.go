@@ -11,7 +11,7 @@ import (
 func seedDB(db *gorm.DB) {
 
 	// Migrate the schema
-	db.AutoMigrate(&model.MenuItem{})
+	db.AutoMigrate(&model.MenuItem{}, &model.OrderData{})
 
 	foodMenu := []model.MenuItem{
 		{

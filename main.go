@@ -17,7 +17,7 @@ const (
 )
 
 const (
-	db_address = "host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable"
+	dbAddress = "host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable"
 )
 
 type MenuItem struct {
@@ -27,9 +27,9 @@ type MenuItem struct {
 	Type      MenuType
 }
 
-func seed_db() {
-	db_address := "host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable"
-	db, err := gorm.Open(postgres.Open(db_address), &gorm.Config{})
+func seedDB() {
+	dbAddress := "host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dbAddress), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -37,7 +37,7 @@ func seed_db() {
 	// Migrate the schema
 	db.AutoMigrate(&MenuItem{})
 
-	food_menu := []MenuItem{
+	foodMenu := []MenuItem{
 		{
 			Name:      "Bakmie",
 			OrderCode: "bakmie",
@@ -52,7 +52,7 @@ func seed_db() {
 		},
 	}
 
-	drinks_menu := []MenuItem{
+	drinksMenu := []MenuItem{
 		{
 			Name:      "Es Teh",
 			OrderCode: "es_teh",
@@ -81,34 +81,34 @@ func seed_db() {
 
 	if err := db.First(&MenuItem{}).Error; err == gorm.ErrRecordNotFound {
 		fmt.Println("Seeding db data...")
-		db.Create(&food_menu)
-		db.Create(&drinks_menu)
+		db.Create(&foodMenu)
+		db.Create(&drinksMenu)
 	}
 }
 
 func main() {
 	e := echo.New()
 
-	seed_db()
+	seedDB()
 
-	e.GET("/menu", get_menu)
+	e.GET("/menu", GetMenu)
 
 	e.Logger.Fatal(e.Start((":14045")))
 }
 
-func get_menu(c echo.Context) error {
-	menu_type := c.FormValue("menu_type")
+func GetMenu(c echo.Context) error {
+	menuType := c.FormValue("menu_type")
 
-	db, err := gorm.Open(postgres.Open(db_address), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dbAddress), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	menu_data := make([]MenuItem, 0)
+	menuData := make([]MenuItem, 0)
 
-	db.Where(MenuItem{Type: MenuType(menu_type)}).Find(&menu_data)
+	db.Where(MenuItem{Type: MenuType(menuType)}).Find(&menuData)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"data": menu_data,
+		"data": menuData,
 	})
 }

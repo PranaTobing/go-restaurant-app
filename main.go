@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/cmplx"
 )
@@ -63,7 +64,7 @@ func main() {
 	fmt.Printf("Type: %T Value: %v\n", byteVarString, string(byteVarString))
 
 	// rune > alias for int32, represents a unicode code point
-	runeVar := '@'
+	runeVar := '😀'
 	// notice how rune var is initiated by single quotes, while string uses double quotes
 	// single/double quotes are not interchangable in Golang.
 	fmt.Printf("Type: %T Value: %v\n", runeVar, runeVar)
@@ -72,4 +73,7 @@ func main() {
 	// consists of complex64 complex128
 	complexVar := cmplx.Sqrt(-7 + 3i)
 	fmt.Printf("Type: %T Value: %v\n", complexVar, complexVar)
+
+	var errVar error = errors.New("an error")
+	fmt.Printf("Type: %T Value: %v\n", errVar, errVar)
 }

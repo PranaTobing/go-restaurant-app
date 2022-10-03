@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	mRepo "github.com/rocksus/go-restaurant-app/internal/repository/menu"
+	oRepo "github.com/rocksus/go-restaurant-app/internal/repository/order"
 	rUsecase "github.com/rocksus/go-restaurant-app/internal/usecase/resto"
 
 	"github.com/rocksus/go-restaurant-app/internal/database"
@@ -16,7 +17,8 @@ func main() {
 	db := database.GetDB("host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable")
 
 	menuRepo := mRepo.GetRepository(db)
-	restoUsecase := rUsecase.GetUsecase(menuRepo)
+	orderRepo := oRepo.GetRepository(db)
+	restoUsecase := rUsecase.GetUsecase(menuRepo, orderRepo)
 
 	h := rest.NewHandler(restoUsecase)
 

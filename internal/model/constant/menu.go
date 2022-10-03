@@ -3,6 +3,6 @@ package constant
 type MenuType string
 
 const (
-	Food  MenuType = "food"
-	Drink MenuType = "drink"
+	MenuTypeFood  MenuType = "food"
+	MenuTypeDrink MenuType = "drink"
 )

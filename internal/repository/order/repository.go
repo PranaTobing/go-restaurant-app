@@ -5,5 +5,6 @@ import (
 )
 
 type Repository interface {
-	CreateOrder(order model.OrderData) (string, error)
+	CreateOrder(order model.Order) (model.Order, error)
+	GetOrderInfo(orderID string) (model.Order, error)
 }

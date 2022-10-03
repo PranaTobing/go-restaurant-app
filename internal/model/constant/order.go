@@ -3,7 +3,14 @@ package constant
 type OrderStatus string
 
 const (
-	Processed OrderStatus = "processed"
-	Finished  OrderStatus = "finished"
-	Failed    OrderStatus = "failed"
+	OrderStatusProcessed OrderStatus = "processed"
+	OrderStatusFinished  OrderStatus = "finished"
+	OrderStatusFailed    OrderStatus = "failed"
+)
+
+type ProductOrderStatus string
+
+const (
+	ProductOrderStatusPreparing ProductOrderStatus = "preparing"
+	ProductOrderStatusFinished  ProductOrderStatus = "finished"
 )

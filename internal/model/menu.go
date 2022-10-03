@@ -5,8 +5,8 @@ import (
 )
 
 type MenuItem struct {
-	OrderCode string `gorm:"primaryKey"`
-	Name      string
-	Price     int64
-	Type      constant.MenuType
+	OrderCode string            `gorm:"primaryKey" json:"order_code"`
+	Name      string            `json:"name"`
+	Price     int64             `json:"price"`
+	Type      constant.MenuType `json:"type"`
 }

@@ -5,5 +5,6 @@ import (
 )
 
 type Repository interface {
-	GetMenu(menuType string) ([]model.MenuItem, error)
+	GetMenuList(menuType string) ([]model.MenuItem, error)
+	GetMenu(orderCode string) (model.MenuItem, error)
 }

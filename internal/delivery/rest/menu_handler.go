@@ -10,7 +10,7 @@ import (
 func (h *handler) GetMenu(c echo.Context) error {
 	menuType := c.FormValue("menu_type")
 
-	menuData, err := h.restoUsecase.GetMenu(menuType)
+	menuData, err := h.restoUsecase.GetMenuList(menuType)
 	if err != nil {
 		fmt.Printf("got error %s\n", err.Error())
 

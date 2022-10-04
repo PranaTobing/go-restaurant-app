@@ -50,7 +50,7 @@ func (ur *userRepo) RegisterUser(userData model.User) (model.User, error) {
 func (ur *userRepo) CheckRegistered(username string) (bool, error) {
 	var userData model.User
 
-	if err := ur.db.Model(&model.User{}).Where(model.User{Username: username}).First(&userData).Error; err != nil {
+	if err := ur.db.Where(model.User{Username: username}).First(&userData).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return false, nil
 		} else {

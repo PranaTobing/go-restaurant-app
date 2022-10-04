@@ -2,8 +2,10 @@ package user
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
+	"strings"
 
 	"golang.org/x/crypto/argon2"
 )
@@ -56,4 +58,39 @@ func (ur *userRepo) decrypt(ciphertext string) ([]byte, error) {
 		decoded[ur.gcm.NonceSize():],
 		nil,
 	)
+}
+
+func (ur *userRepo) comparePassword(password, hash string) (bool, error) {
+	parts := strings.Split(hash, "$")
+
+	var memory, time uint32
+	var parallelism uint8
+
+	//use switch case for flexibility
+	switch parts[1] {
+	case "argon2id":
+		_, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &time, &parallelism)
+		if err != nil {
+			return false, err
+		}
+
+		salt, err := base64.RawStdEncoding.DecodeString(parts[4])
+		if err != nil {
+			return false, err
+		}
+
+		decodedHash := parts[5]
+
+		decryptedHash, err := ur.decrypt(decodedHash)
+		if err != nil {
+			return false, err
+		}
+
+		var keyLen = uint32(len(decryptedHash))
+
+		comparisonHash := argon2.IDKey([]byte(password), salt, time, memory, parallelism, keyLen)
+
+		return subtle.ConstantTimeCompare(decryptedHash, comparisonHash) == 1, nil
+	}
+	return false, nil
 }

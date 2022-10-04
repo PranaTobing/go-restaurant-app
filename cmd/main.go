@@ -1,6 +1,10 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"time"
+
 	"github.com/labstack/echo/v4"
 
 	mRepo "github.com/rocksus/go-restaurant-app/internal/repository/menu"
@@ -17,13 +21,18 @@ func main() {
 
 	db := database.GetDB("host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable")
 	secret := "AES256Key-32Characters1234567890"
-
-	menuRepo := mRepo.GetRepository(db)
-	orderRepo := oRepo.GetRepository(db)
-	userRepo, err := uRepo.GetRepository(db, secret, 1, 64*1024, 4, 32)
+	signKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		panic(err)
 	}
+
+	menuRepo := mRepo.GetRepository(db)
+	orderRepo := oRepo.GetRepository(db)
+	userRepo, err := uRepo.GetRepository(db, secret, 1, 64*1024, 4, 32, signKey, 60*time.Second)
+	if err != nil {
+		panic(err)
+	}
+
 	restoUsecase := rUsecase.GetUsecase(menuRepo, orderRepo, userRepo)
 
 	h := rest.NewHandler(restoUsecase)

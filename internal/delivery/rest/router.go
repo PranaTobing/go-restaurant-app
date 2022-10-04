@@ -17,6 +17,7 @@ func LoadRoutes(e *echo.Echo, handler *handler) {
 
 	userGroup := e.Group("/user")
 	userGroup.POST("/register", handler.RegisterUser)
+	userGroup.POST("/login", handler.Login)
 }
 
 func LoadMiddlewares(e *echo.Echo) {

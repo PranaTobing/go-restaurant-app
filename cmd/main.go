@@ -5,6 +5,7 @@ import (
 
 	mRepo "github.com/rocksus/go-restaurant-app/internal/repository/menu"
 	oRepo "github.com/rocksus/go-restaurant-app/internal/repository/order"
+	uRepo "github.com/rocksus/go-restaurant-app/internal/repository/user"
 	rUsecase "github.com/rocksus/go-restaurant-app/internal/usecase/resto"
 
 	"github.com/rocksus/go-restaurant-app/internal/database"
@@ -15,10 +16,15 @@ func main() {
 	e := echo.New()
 
 	db := database.GetDB("host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable")
+	secret := "AES256Key-32Characters1234567890"
 
 	menuRepo := mRepo.GetRepository(db)
 	orderRepo := oRepo.GetRepository(db)
-	restoUsecase := rUsecase.GetUsecase(menuRepo, orderRepo)
+	userRepo, err := uRepo.GetRepository(db, secret, 1, 64*1024, 4, 32)
+	if err != nil {
+		panic(err)
+	}
+	restoUsecase := rUsecase.GetUsecase(menuRepo, orderRepo, userRepo)
 
 	h := rest.NewHandler(restoUsecase)
 

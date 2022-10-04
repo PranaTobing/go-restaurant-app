@@ -14,6 +14,9 @@ func LoadRoutes(e *echo.Echo, handler *handler) {
 	orderGroup := e.Group("/order")
 	orderGroup.POST("", handler.Order)
 	orderGroup.GET("/:orderID", handler.GetOrderInfo)
+
+	userGroup := e.Group("/user")
+	userGroup.POST("/register", handler.RegisterUser)
 }
 
 func LoadMiddlewares(e *echo.Echo) {

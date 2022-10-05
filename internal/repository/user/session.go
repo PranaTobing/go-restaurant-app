@@ -23,7 +23,7 @@ func (ur *userRepo) CreateUserSession(userID string) (model.UserSession, error) 
 	}, nil
 }
 
-func (ur *userRepo) Check(data model.UserSession) (userID string, err error) {
+func (ur *userRepo) CheckSession(data model.UserSession) (userID string, err error) {
 
 	accessToken, err := jwt.ParseWithClaims(data.JWTToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return &ur.signKey.PublicKey, nil

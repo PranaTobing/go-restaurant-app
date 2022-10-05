@@ -6,6 +6,8 @@ import (
 	"github.com/rocksus/go-restaurant-app/internal/model"
 )
 
+//go:generate mockgen -package=mocks -mock_names=Usecase=MockRestoUsecase -destination=../../mocks/resto_usecase_mock.go -source=usecase.go
+
 type Usecase interface {
 	GetMenuList(ctx context.Context, menuType string) ([]model.MenuItem, error)
 	Order(ctx context.Context, request model.OrderMenuRequest) (model.Order, error)

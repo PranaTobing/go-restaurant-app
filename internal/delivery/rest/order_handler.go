@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/rocksus/go-restaurant-app/internal/model"
+	"github.com/rocksus/go-restaurant-app/internal/model/constant"
 )
 
 func (h *handler) Order(c echo.Context) error {
@@ -19,6 +20,9 @@ func (h *handler) Order(c echo.Context) error {
 			"error": err.Error(),
 		})
 	}
+
+	userID := c.Request().Context().Value(constant.AuthContextKey).(string)
+	request.UserID = userID
 
 	orderData, err := h.restoUsecase.Order(request)
 	if err != nil {
@@ -36,9 +40,11 @@ func (h *handler) Order(c echo.Context) error {
 
 func (h *handler) GetOrderInfo(c echo.Context) error {
 	orderID := c.Param("orderID")
+	userID := c.Request().Context().Value(constant.AuthContextKey).(string)
 
 	orderData, err := h.restoUsecase.GetOrderInfo(model.GetOrderInfoRequest{
 		OrderID: orderID,
+		UserID:  userID,
 	})
 	if err != nil {
 		fmt.Printf("got error %s\n", err.Error())

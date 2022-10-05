@@ -6,6 +6,7 @@ import "github.com/rocksus/go-restaurant-app/internal/model/constant"
 type Order struct {
 	// just note, gorm uses ID field as primary key by default
 	ID            string               `gorm:"primaryKey" json:"id"`
+	UserID        string               `gorm:"index" json:"user_id"`
 	Status        constant.OrderStatus `json:"status"`
 	ProductOrders []ProductOrder       `json:"product_orders"`
 	ReferenceID   string               `gorm:"unique" json:"reference_id"`
@@ -26,10 +27,12 @@ type OrderMenuProductRequest struct {
 }
 
 type OrderMenuRequest struct {
+	UserID        string                    `json:"-"`
 	OrderProducts []OrderMenuProductRequest `json:"order_products"`
 	ReferenceID   string                    `json:"reference_id"`
 }
 
 type GetOrderInfoRequest struct {
 	OrderID string
+	UserID  string
 }

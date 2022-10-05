@@ -6,14 +6,18 @@ import (
 )
 
 func LoadRoutes(e *echo.Echo, handler *handler) {
+	authMiddleware := GetAuthMiddleware(handler.restoUsecase)
+
 	menuGroup := e.Group("/menu", middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://restoku.com"},
 	}))
 	menuGroup.GET("", handler.GetMenu)
 
 	orderGroup := e.Group("/order")
-	orderGroup.POST("", handler.Order)
-	orderGroup.GET("/:orderID", handler.GetOrderInfo)
+	orderGroup.POST("", handler.Order,
+		authMiddleware.CheckAuth)
+	orderGroup.GET("/:orderID", handler.GetOrderInfo,
+		authMiddleware.CheckAuth)
 
 	userGroup := e.Group("/user")
 	userGroup.POST("/register", handler.RegisterUser)

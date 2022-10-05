@@ -29,7 +29,7 @@ func (ur *userRepo) CheckSession(data model.UserSession) (userID string, err err
 		return &ur.signKey.PublicKey, nil
 	})
 	if err != nil {
-		return "", err
+		return "", errors.New("access token expired/invalid")
 	}
 	accessTokenClaims, ok := accessToken.Claims.(*Claims)
 	if !ok {

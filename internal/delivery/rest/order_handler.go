@@ -2,19 +2,21 @@ package rest
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rocksus/go-restaurant-app/internal/model"
 	"github.com/rocksus/go-restaurant-app/internal/model/constant"
+	"github.com/sirupsen/logrus"
 )
 
 func (h *handler) Order(c echo.Context) error {
 	var request model.OrderMenuRequest
 	err := json.NewDecoder(c.Request().Body).Decode(&request)
 	if err != nil {
-		fmt.Printf("got error %s\n", err.Error())
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[delivery][rest][order_handler][Order] decode request data failed")
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"error": err.Error(),
@@ -26,7 +28,9 @@ func (h *handler) Order(c echo.Context) error {
 
 	orderData, err := h.restoUsecase.Order(request)
 	if err != nil {
-		fmt.Printf("got error %s\n", err.Error())
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[delivery][rest][order_handler][Order] order failed")
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"error": err.Error(),
@@ -47,7 +51,9 @@ func (h *handler) GetOrderInfo(c echo.Context) error {
 		UserID:  userID,
 	})
 	if err != nil {
-		fmt.Printf("got error %s\n", err.Error())
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[delivery][rest][order_handler][GetOrderInfo] unable to get order info")
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"error": err.Error(),

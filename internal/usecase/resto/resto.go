@@ -9,6 +9,7 @@ import (
 	"github.com/rocksus/go-restaurant-app/internal/repository/menu"
 	"github.com/rocksus/go-restaurant-app/internal/repository/order"
 	"github.com/rocksus/go-restaurant-app/internal/repository/user"
+	"github.com/sirupsen/logrus"
 )
 
 type restoUsecase struct {
@@ -26,7 +27,16 @@ func GetUsecase(menuRepo menu.Repository, orderRepo order.Repository, userRepo u
 }
 
 func (m *restoUsecase) GetMenuList(menuType string) ([]model.MenuItem, error) {
-	return m.menuRepo.GetMenuList(menuType)
+	res, err := m.menuRepo.GetMenuList(menuType)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][GetMenuList] unable to get menu list")
+
+		return nil, err
+	}
+
+	return res, err
 }
 
 func (m *restoUsecase) Order(request model.OrderMenuRequest) (model.Order, error) {
@@ -35,6 +45,11 @@ func (m *restoUsecase) Order(request model.OrderMenuRequest) (model.Order, error
 	for i, orderProduct := range request.OrderProducts {
 		menuData, err := m.menuRepo.GetMenu(orderProduct.OrderCode)
 		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"err":        err,
+				"order_code": orderProduct.OrderCode,
+			}).Error("[usecase][resto][Order] unable to get menu")
+
 			return model.Order{}, err
 		}
 
@@ -57,6 +72,10 @@ func (m *restoUsecase) Order(request model.OrderMenuRequest) (model.Order, error
 
 	createdOrderData, err := m.orderRepo.CreateOrder(orderData)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][Order] unable to create order data")
+
 		return model.Order{}, err
 	}
 
@@ -66,10 +85,18 @@ func (m *restoUsecase) Order(request model.OrderMenuRequest) (model.Order, error
 func (m *restoUsecase) GetOrderInfo(request model.GetOrderInfoRequest) (model.Order, error) {
 	orderData, err := m.orderRepo.GetOrderInfo(request.OrderID)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][GetOrderInfo] unable to get order info")
+
 		return orderData, err
 	}
 
 	if orderData.UserID != request.UserID {
+		logrus.WithFields(logrus.Fields{
+			"request_user_id": request.UserID,
+		}).Warn("[usecase][resto][GetOrderInfo] userID mismatch, not authorized")
+
 		return model.Order{}, errors.New("unauthorized")
 	}
 
@@ -79,6 +106,10 @@ func (m *restoUsecase) GetOrderInfo(request model.GetOrderInfoRequest) (model.Or
 func (m *restoUsecase) RegisterUser(request model.RegisterRequest) (model.User, error) {
 	userRegistered, err := m.userRepo.CheckRegistered(request.Username)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][RegisterUser] unable to check registered")
+
 		return model.User{}, err
 	}
 	if userRegistered {
@@ -87,6 +118,10 @@ func (m *restoUsecase) RegisterUser(request model.RegisterRequest) (model.User, 
 
 	userHash, err := m.userRepo.GenerateUserHash(request.Password)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][RegisterUser] unable to generate user hash")
+
 		return model.User{}, err
 	}
 
@@ -96,6 +131,10 @@ func (m *restoUsecase) RegisterUser(request model.RegisterRequest) (model.User, 
 		Hash:     userHash,
 	})
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][RegisterUser] unable to register user")
+
 		return model.User{}, err
 	}
 
@@ -105,20 +144,36 @@ func (m *restoUsecase) RegisterUser(request model.RegisterRequest) (model.User, 
 func (m *restoUsecase) Login(request model.LoginRequest) (model.UserSession, error) {
 	userData, err := m.userRepo.GetUserData(request.Username)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][Login] unable to get user data")
+
 		return model.UserSession{}, err
 	}
 
 	verified, err := m.userRepo.VerifyLogin(request.Username, request.Password, userData)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][Login] unable to verify login")
+
 		return model.UserSession{}, err
 	}
 
 	if !verified {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("[usecase][resto][Login] unverified login attempt")
+
 		return model.UserSession{}, errors.New("can't verify user login")
 	}
 
 	userSession, err := m.userRepo.CreateUserSession(userData.ID)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][Login] unable to create user session")
+
 		return model.UserSession{}, err
 	}
 
@@ -128,6 +183,10 @@ func (m *restoUsecase) Login(request model.LoginRequest) (model.UserSession, err
 func (m *restoUsecase) CheckSession(sessionData model.UserSession) (userID string, err error) {
 	userID, err = m.userRepo.CheckSession(sessionData)
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[usecase][resto][CheckSession] unable to check session")
+
 		return "", err
 	}
 

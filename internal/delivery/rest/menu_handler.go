@@ -1,10 +1,10 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 func (h *handler) GetMenu(c echo.Context) error {
@@ -12,7 +12,9 @@ func (h *handler) GetMenu(c echo.Context) error {
 
 	menuData, err := h.restoUsecase.GetMenuList(menuType)
 	if err != nil {
-		fmt.Printf("got error %s\n", err.Error())
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("[delivery][rest][menu_handler][GetMenu] unable to get menu list")
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"error": err.Error(),

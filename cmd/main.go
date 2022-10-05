@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/rocksus/go-restaurant-app/internal/logger"
 	mRepo "github.com/rocksus/go-restaurant-app/internal/repository/menu"
 	oRepo "github.com/rocksus/go-restaurant-app/internal/repository/order"
 	uRepo "github.com/rocksus/go-restaurant-app/internal/repository/user"
@@ -17,6 +18,7 @@ import (
 )
 
 func main() {
+	logger.Init()
 	e := echo.New()
 
 	db := database.GetDB("host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable")

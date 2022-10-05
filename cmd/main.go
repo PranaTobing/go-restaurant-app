@@ -11,6 +11,7 @@ import (
 	mRepo "github.com/rocksus/go-restaurant-app/internal/repository/menu"
 	oRepo "github.com/rocksus/go-restaurant-app/internal/repository/order"
 	uRepo "github.com/rocksus/go-restaurant-app/internal/repository/user"
+	"github.com/rocksus/go-restaurant-app/internal/tracing"
 	rUsecase "github.com/rocksus/go-restaurant-app/internal/usecase/resto"
 
 	"github.com/rocksus/go-restaurant-app/internal/database"
@@ -19,6 +20,8 @@ import (
 
 func main() {
 	logger.Init()
+	tracing.Init("http://localhost:14268/api/traces")
+
 	e := echo.New()
 
 	db := database.GetDB("host=localhost port=5432 user=postgres password=postgres dbname=go_resto sslmode=disable")

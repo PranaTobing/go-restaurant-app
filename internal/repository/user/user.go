@@ -1,12 +1,14 @@
 package user
 
 import (
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rsa"
 	"time"
 
 	"github.com/rocksus/go-restaurant-app/internal/model"
+	"github.com/rocksus/go-restaurant-app/internal/tracing"
 	"gorm.io/gorm"
 )
 
@@ -54,18 +56,24 @@ func GetRepository(
 	}, nil
 }
 
-func (ur *userRepo) RegisterUser(userData model.User) (model.User, error) {
-	if err := ur.db.Create(&userData).Error; err != nil {
+func (ur *userRepo) RegisterUser(ctx context.Context, userData model.User) (model.User, error) {
+	ctx, span := tracing.CreateSpan(ctx, "RegisterUser")
+	defer span.End()
+
+	if err := ur.db.WithContext(ctx).Create(&userData).Error; err != nil {
 		return model.User{}, err
 	}
 
 	return userData, nil
 }
 
-func (ur *userRepo) CheckRegistered(username string) (bool, error) {
+func (ur *userRepo) CheckRegistered(ctx context.Context, username string) (bool, error) {
+	ctx, span := tracing.CreateSpan(ctx, "CheckRegistered")
+	defer span.End()
+
 	var userData model.User
 
-	if err := ur.db.Where(model.User{Username: username}).First(&userData).Error; err != nil {
+	if err := ur.db.WithContext(ctx).Where(model.User{Username: username}).First(&userData).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return false, nil
 		} else {
@@ -76,22 +84,28 @@ func (ur *userRepo) CheckRegistered(username string) (bool, error) {
 	return userData.ID != "", nil
 }
 
-func (ur *userRepo) GetUserData(username string) (model.User, error) {
+func (ur *userRepo) GetUserData(ctx context.Context, username string) (model.User, error) {
+	ctx, span := tracing.CreateSpan(ctx, "GetUserData")
+	defer span.End()
+
 	var userData model.User
 
-	if err := ur.db.Where(model.User{Username: username}).First(&userData).Error; err != nil {
+	if err := ur.db.WithContext(ctx).Where(model.User{Username: username}).First(&userData).Error; err != nil {
 		return userData, err
 	}
 
 	return userData, nil
 }
 
-func (ur *userRepo) VerifyLogin(username, password string, userData model.User) (bool, error) {
+func (ur *userRepo) VerifyLogin(ctx context.Context, username, password string, userData model.User) (bool, error) {
+	ctx, span := tracing.CreateSpan(ctx, "VerifyLogin")
+	defer span.End()
+
 	if username != userData.Username {
 		return false, nil
 	}
 
-	verified, err := ur.comparePassword(password, userData.Hash)
+	verified, err := ur.comparePassword(ctx, password, userData.Hash)
 	if err != nil {
 		return false, err
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/rocksus/go-restaurant-app/internal/model/constant"
+	"github.com/rocksus/go-restaurant-app/internal/tracing"
 	"github.com/rocksus/go-restaurant-app/internal/usecase/resto"
 )
 
@@ -27,6 +28,9 @@ type authMiddleware struct {
 
 func (am *authMiddleware) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		ctx, span := tracing.CreateSpan(c.Request().Context(), "CheckAuth")
+		defer span.End()
+
 		sessionData, err := GetSessionData(c.Request())
 		if err != nil {
 			return &echo.HTTPError{
@@ -36,7 +40,7 @@ func (am *authMiddleware) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		userID, err := am.restoUsecase.CheckSession(sessionData)
+		userID, err := am.restoUsecase.CheckSession(ctx, sessionData)
 		if err != nil {
 			return &echo.HTTPError{
 				Code:     401,
@@ -45,7 +49,7 @@ func (am *authMiddleware) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		authContext := context.WithValue(c.Request().Context(), constant.AuthContextKey, userID)
+		authContext := context.WithValue(ctx, constant.AuthContextKey, userID)
 		c.SetRequest(c.Request().WithContext(authContext))
 
 		if err := next(c); err != nil {

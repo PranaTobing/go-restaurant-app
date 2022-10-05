@@ -7,10 +7,14 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rocksus/go-restaurant-app/internal/model"
 	"github.com/rocksus/go-restaurant-app/internal/model/constant"
+	"github.com/rocksus/go-restaurant-app/internal/tracing"
 	"github.com/sirupsen/logrus"
 )
 
 func (h *handler) Order(c echo.Context) error {
+	ctx, span := tracing.CreateSpan(c.Request().Context(), "Order")
+	defer span.End()
+
 	var request model.OrderMenuRequest
 	err := json.NewDecoder(c.Request().Body).Decode(&request)
 	if err != nil {
@@ -26,7 +30,7 @@ func (h *handler) Order(c echo.Context) error {
 	userID := c.Request().Context().Value(constant.AuthContextKey).(string)
 	request.UserID = userID
 
-	orderData, err := h.restoUsecase.Order(request)
+	orderData, err := h.restoUsecase.Order(ctx, request)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -43,10 +47,13 @@ func (h *handler) Order(c echo.Context) error {
 }
 
 func (h *handler) GetOrderInfo(c echo.Context) error {
+	ctx, span := tracing.CreateSpan(c.Request().Context(), "GetOrderInfo")
+	defer span.End()
+
 	orderID := c.Param("orderID")
 	userID := c.Request().Context().Value(constant.AuthContextKey).(string)
 
-	orderData, err := h.restoUsecase.GetOrderInfo(model.GetOrderInfoRequest{
+	orderData, err := h.restoUsecase.GetOrderInfo(ctx, model.GetOrderInfoRequest{
 		OrderID: orderID,
 		UserID:  userID,
 	})

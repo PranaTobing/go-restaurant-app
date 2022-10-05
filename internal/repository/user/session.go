@@ -1,19 +1,24 @@
 package user
 
 import (
+	"context"
 	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/rocksus/go-restaurant-app/internal/model"
+	"github.com/rocksus/go-restaurant-app/internal/tracing"
 )
 
 type Claims struct {
 	jwt.StandardClaims
 }
 
-func (ur *userRepo) CreateUserSession(userID string) (model.UserSession, error) {
-	accessToken, err := ur.generateAccessToken(userID)
+func (ur *userRepo) CreateUserSession(ctx context.Context, userID string) (model.UserSession, error) {
+	ctx, span := tracing.CreateSpan(ctx, "CreateUserSession")
+	defer span.End()
+
+	accessToken, err := ur.generateAccessToken(ctx, userID)
 	if err != nil {
 		return model.UserSession{}, err
 	}
@@ -23,7 +28,9 @@ func (ur *userRepo) CreateUserSession(userID string) (model.UserSession, error) 
 	}, nil
 }
 
-func (ur *userRepo) CheckSession(data model.UserSession) (userID string, err error) {
+func (ur *userRepo) CheckSession(ctx context.Context, data model.UserSession) (userID string, err error) {
+	_, span := tracing.CreateSpan(ctx, "CheckSession")
+	defer span.End()
 
 	accessToken, err := jwt.ParseWithClaims(data.JWTToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return &ur.signKey.PublicKey, nil
@@ -43,7 +50,10 @@ func (ur *userRepo) CheckSession(data model.UserSession) (userID string, err err
 	return "", errors.New("unauthorized")
 }
 
-func (ur *userRepo) generateAccessToken(userID string) (string, error) {
+func (ur *userRepo) generateAccessToken(ctx context.Context, userID string) (string, error) {
+	_, span := tracing.CreateSpan(ctx, "generateAccessToken")
+	defer span.End()
+
 	accessTokenExp := time.Now().Add(ur.accessExp).Unix()
 	accessClaims := Claims{
 		jwt.StandardClaims{

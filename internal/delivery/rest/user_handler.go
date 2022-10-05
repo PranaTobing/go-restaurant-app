@@ -6,10 +6,14 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/rocksus/go-restaurant-app/internal/model"
+	"github.com/rocksus/go-restaurant-app/internal/tracing"
 	"github.com/sirupsen/logrus"
 )
 
 func (h *handler) RegisterUser(c echo.Context) error {
+	ctx, span := tracing.CreateSpan(c.Request().Context(), "RegisterUser")
+	defer span.End()
+
 	var request model.RegisterRequest
 	err := json.NewDecoder(c.Request().Body).Decode(&request)
 	if err != nil {
@@ -22,7 +26,7 @@ func (h *handler) RegisterUser(c echo.Context) error {
 		})
 	}
 
-	userData, err := h.restoUsecase.RegisterUser(request)
+	userData, err := h.restoUsecase.RegisterUser(ctx, request)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -39,6 +43,9 @@ func (h *handler) RegisterUser(c echo.Context) error {
 }
 
 func (h *handler) Login(c echo.Context) error {
+	ctx, span := tracing.CreateSpan(c.Request().Context(), "Login")
+	defer span.End()
+
 	var request model.LoginRequest
 	err := json.NewDecoder(c.Request().Body).Decode(&request)
 	if err != nil {
@@ -51,7 +58,7 @@ func (h *handler) Login(c echo.Context) error {
 		})
 	}
 
-	sessionData, err := h.restoUsecase.Login(request)
+	sessionData, err := h.restoUsecase.Login(ctx, request)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,

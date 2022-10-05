@@ -1,6 +1,7 @@
 package resto
 
 import (
+	"context"
 	"errors"
 
 	"github.com/google/uuid"
@@ -9,6 +10,7 @@ import (
 	"github.com/rocksus/go-restaurant-app/internal/repository/menu"
 	"github.com/rocksus/go-restaurant-app/internal/repository/order"
 	"github.com/rocksus/go-restaurant-app/internal/repository/user"
+	"github.com/rocksus/go-restaurant-app/internal/tracing"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,8 +28,11 @@ func GetUsecase(menuRepo menu.Repository, orderRepo order.Repository, userRepo u
 	}
 }
 
-func (m *restoUsecase) GetMenuList(menuType string) ([]model.MenuItem, error) {
-	res, err := m.menuRepo.GetMenuList(menuType)
+func (m *restoUsecase) GetMenuList(ctx context.Context, menuType string) ([]model.MenuItem, error) {
+	ctx, span := tracing.CreateSpan(ctx, "GetMenuList")
+	defer span.End()
+
+	res, err := m.menuRepo.GetMenuList(ctx, menuType)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -39,11 +44,14 @@ func (m *restoUsecase) GetMenuList(menuType string) ([]model.MenuItem, error) {
 	return res, err
 }
 
-func (m *restoUsecase) Order(request model.OrderMenuRequest) (model.Order, error) {
+func (m *restoUsecase) Order(ctx context.Context, request model.OrderMenuRequest) (model.Order, error) {
+	ctx, span := tracing.CreateSpan(ctx, "Order")
+	defer span.End()
+
 	productOrderData := make([]model.ProductOrder, len(request.OrderProducts))
 
 	for i, orderProduct := range request.OrderProducts {
-		menuData, err := m.menuRepo.GetMenu(orderProduct.OrderCode)
+		menuData, err := m.menuRepo.GetMenu(ctx, orderProduct.OrderCode)
 		if err != nil {
 			logrus.WithFields(logrus.Fields{
 				"err":        err,
@@ -70,7 +78,7 @@ func (m *restoUsecase) Order(request model.OrderMenuRequest) (model.Order, error
 		ReferenceID:   request.ReferenceID,
 	}
 
-	createdOrderData, err := m.orderRepo.CreateOrder(orderData)
+	createdOrderData, err := m.orderRepo.CreateOrder(ctx, orderData)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -82,8 +90,11 @@ func (m *restoUsecase) Order(request model.OrderMenuRequest) (model.Order, error
 	return createdOrderData, nil
 }
 
-func (m *restoUsecase) GetOrderInfo(request model.GetOrderInfoRequest) (model.Order, error) {
-	orderData, err := m.orderRepo.GetOrderInfo(request.OrderID)
+func (m *restoUsecase) GetOrderInfo(ctx context.Context, request model.GetOrderInfoRequest) (model.Order, error) {
+	ctx, span := tracing.CreateSpan(ctx, "GetOrderInfo")
+	defer span.End()
+
+	orderData, err := m.orderRepo.GetOrderInfo(ctx, request.OrderID)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -103,8 +114,11 @@ func (m *restoUsecase) GetOrderInfo(request model.GetOrderInfoRequest) (model.Or
 	return orderData, nil
 }
 
-func (m *restoUsecase) RegisterUser(request model.RegisterRequest) (model.User, error) {
-	userRegistered, err := m.userRepo.CheckRegistered(request.Username)
+func (m *restoUsecase) RegisterUser(ctx context.Context, request model.RegisterRequest) (model.User, error) {
+	ctx, span := tracing.CreateSpan(ctx, "RegisterUser")
+	defer span.End()
+
+	userRegistered, err := m.userRepo.CheckRegistered(ctx, request.Username)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -116,7 +130,7 @@ func (m *restoUsecase) RegisterUser(request model.RegisterRequest) (model.User, 
 		return model.User{}, errors.New("user already registered")
 	}
 
-	userHash, err := m.userRepo.GenerateUserHash(request.Password)
+	userHash, err := m.userRepo.GenerateUserHash(ctx, request.Password)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -125,7 +139,7 @@ func (m *restoUsecase) RegisterUser(request model.RegisterRequest) (model.User, 
 		return model.User{}, err
 	}
 
-	userData, err := m.userRepo.RegisterUser(model.User{
+	userData, err := m.userRepo.RegisterUser(ctx, model.User{
 		ID:       uuid.New().String(),
 		Username: request.Username,
 		Hash:     userHash,
@@ -141,8 +155,11 @@ func (m *restoUsecase) RegisterUser(request model.RegisterRequest) (model.User, 
 	return userData, nil
 }
 
-func (m *restoUsecase) Login(request model.LoginRequest) (model.UserSession, error) {
-	userData, err := m.userRepo.GetUserData(request.Username)
+func (m *restoUsecase) Login(ctx context.Context, request model.LoginRequest) (model.UserSession, error) {
+	ctx, span := tracing.CreateSpan(ctx, "Login")
+	defer span.End()
+
+	userData, err := m.userRepo.GetUserData(ctx, request.Username)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -151,7 +168,7 @@ func (m *restoUsecase) Login(request model.LoginRequest) (model.UserSession, err
 		return model.UserSession{}, err
 	}
 
-	verified, err := m.userRepo.VerifyLogin(request.Username, request.Password, userData)
+	verified, err := m.userRepo.VerifyLogin(ctx, request.Username, request.Password, userData)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -168,7 +185,7 @@ func (m *restoUsecase) Login(request model.LoginRequest) (model.UserSession, err
 		return model.UserSession{}, errors.New("can't verify user login")
 	}
 
-	userSession, err := m.userRepo.CreateUserSession(userData.ID)
+	userSession, err := m.userRepo.CreateUserSession(ctx, userData.ID)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,
@@ -180,8 +197,11 @@ func (m *restoUsecase) Login(request model.LoginRequest) (model.UserSession, err
 	return userSession, nil
 }
 
-func (m *restoUsecase) CheckSession(sessionData model.UserSession) (userID string, err error) {
-	userID, err = m.userRepo.CheckSession(sessionData)
+func (m *restoUsecase) CheckSession(ctx context.Context, sessionData model.UserSession) (userID string, err error) {
+	ctx, span := tracing.CreateSpan(ctx, "CheckSession")
+	defer span.End()
+
+	userID, err = m.userRepo.CheckSession(ctx, sessionData)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,

@@ -4,13 +4,17 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/rocksus/go-restaurant-app/internal/tracing"
 	"github.com/sirupsen/logrus"
 )
 
 func (h *handler) GetMenu(c echo.Context) error {
+	ctx, span := tracing.CreateSpan(c.Request().Context(), "GetMenu")
+	defer span.End()
+
 	menuType := c.FormValue("menu_type")
 
-	menuData, err := h.restoUsecase.GetMenuList(menuType)
+	menuData, err := h.restoUsecase.GetMenuList(ctx, menuType)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"err": err,

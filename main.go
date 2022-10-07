@@ -74,6 +74,13 @@ func main() {
 	complexVar := cmplx.Sqrt(-7 + 3i)
 	fmt.Printf("Type: %T Value: %v\n", complexVar, complexVar)
 
+	// honorable mentions
+	var myInterface interface{}
+	myInterface = 5
+	fmt.Printf("Type: %T Value: %v\n", myInterface, myInterface)
+	myInterface = "hello"
+	fmt.Printf("Type: %T Value: %v\n", myInterface, myInterface)
+
 	var errVar error = errors.New("an error")
 	fmt.Printf("Type: %T Value: %v\n", errVar, errVar)
 }

@@ -20,7 +20,9 @@ func (m *menuRepo) GetMenu(menuType string) ([]model.MenuItem, error) {
 
 	menuData := make([]model.MenuItem, 0)
 
-	m.db.Where(model.MenuItem{Type: constant.MenuType(menuType)}).Find(&menuData)
+	if err := m.db.Where(model.MenuItem{Type: constant.MenuType(menuType)}).Find(&menuData).Error; err != nil {
+		return nil, err
+	}
 
 	return menuData, nil
 }

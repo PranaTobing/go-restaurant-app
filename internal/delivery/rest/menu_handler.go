@@ -14,7 +14,7 @@ func (h *handler) GetMenu(c echo.Context) error {
 	if err != nil {
 		fmt.Printf("got error %s\n", err.Error())
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}

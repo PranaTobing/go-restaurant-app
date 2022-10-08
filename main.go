@@ -12,7 +12,7 @@ func main() {
 	e.GET("/menu/food", getFoodMenu)
 	e.GET("/menu/drinks", getDrinksMenu)
 
-	e.Logger.Fatal(e.Start((":14045")))
+	e.Logger.Fatal(e.Start(":14045"))
 }
 
 type MenuItem struct {

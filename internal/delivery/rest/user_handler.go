@@ -21,7 +21,7 @@ func (h *handler) RegisterUser(c echo.Context) error {
 			"err": err,
 		}).Error("[delivery][rest][user_handler][RegisterUser] unable to decode request")
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -32,7 +32,7 @@ func (h *handler) RegisterUser(c echo.Context) error {
 			"err": err,
 		}).Error("[delivery][rest][user_handler][RegisterUser] unable to register user")
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}

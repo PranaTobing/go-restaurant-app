@@ -46,7 +46,7 @@ func (h *handler) Login(c echo.Context) error {
 			"err": err,
 		}).Error("[delivery][rest][user_handler][Login] unable to decode request")
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -57,7 +57,7 @@ func (h *handler) Login(c echo.Context) error {
 			"err": err,
 		}).Error("[delivery][rest][user_handler][Login] unable to login user")
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}

@@ -20,7 +20,7 @@ func (h *handler) GetMenu(c echo.Context) error {
 			"err": err,
 		}).Error("[delivery][rest][menu_handler][GetMenu] unable to get menu list")
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}

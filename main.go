@@ -106,7 +106,11 @@ func GetMenu(c echo.Context) error {
 
 	menuData := make([]MenuItem, 0)
 
-	db.Where(MenuItem{Type: MenuType(menuType)}).Find(&menuData)
+	if err := db.Where(MenuItem{Type: MenuType(menuType)}).Find(&menuData).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"data": menuData,

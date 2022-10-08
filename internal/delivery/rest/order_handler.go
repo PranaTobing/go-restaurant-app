@@ -36,7 +36,7 @@ func (h *handler) Order(c echo.Context) error {
 			"err": err,
 		}).Error("[delivery][rest][order_handler][Order] order failed")
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -62,7 +62,7 @@ func (h *handler) GetOrderInfo(c echo.Context) error {
 			"err": err,
 		}).Error("[delivery][rest][order_handler][GetOrderInfo] unable to get order info")
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}

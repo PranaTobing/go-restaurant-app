@@ -6,9 +6,7 @@ import (
 )
 
 func LoadRoutes(e *echo.Echo, handler *handler) {
-	menuGroup := e.Group("/menu", middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://restoku.com"},
-	}))
+	menuGroup := e.Group("/menu")
 	menuGroup.GET("", handler.GetMenu)
 
 	orderGroup := e.Group("/order")

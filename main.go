@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 func greet(c chan string) {
@@ -23,27 +22,22 @@ func greetUntilQuit(c chan string, quit chan int) {
 	}
 }
 
-func counter(quit chan int) {
-	var i int = 0
+func nameReceiver(c chan string, quit chan int) {
 	for {
-		select {
-		case <-quit:
-			return
-		default:
-			fmt.Println(i)
-			i += 1
-			time.Sleep(500 * time.Millisecond)
+		name, more := <-c
+		if more {
+			fmt.Printf("A received name: %s\n", name)
+		} else {
+			fmt.Println("Received all data")
+			quit <- 0
 		}
 	}
 }
 
-func timer(quit chan int) {
-	for i := 5; i >= 0; i-- {
-		time.Sleep(1 * time.Second)
-		fmt.Printf("timer %d...\n", i)
-	}
-	fmt.Println("quitting")
-	quit <- 0
+func nameProducer(c chan string) {
+	c <- "Banana"
+	c <- "Apple"
+	c <- "Orange"
 }
 
 func main() {
@@ -65,10 +59,10 @@ func main() {
 	c <- "Orange"
 	quit <- 0
 
-	go counter(quit)
-	go timer(quit)
-	<-quit
+	go nameReceiver(c, quit)
+	nameProducer(c)
 
-	// channel should be closed
+	// closed channel trigger a signal too
 	close(c)
+	<-quit
 }

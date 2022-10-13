@@ -40,6 +40,7 @@ func main() {
 			defer wg.Done()
 			// try doing it without mutex and see what happens!
 			mutex.Lock()
+			fmt.Println("Previous value: ", sharedResource)
 			sharedResource = fmt.Sprintf("key owned by: [%d]", id)
 			fmt.Println(sharedResource)
 			mutex.Unlock()

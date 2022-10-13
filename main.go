@@ -63,7 +63,7 @@ func main() {
 	start = time.Now()
 	fmt.Println("calling expensive function")
 	newResult := service.GetData(key)
-	fmt.Println("cachedexpensive function called, duration:", time.Since(start))
+	fmt.Println("cached expensive function called, duration:", time.Since(start))
 	fmt.Println(newResult)
 
 }

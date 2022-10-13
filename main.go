@@ -5,9 +5,26 @@ import (
 	"time"
 )
 
-func expensiveFunction(key string) string {
+type myService struct {
+	cacher *cache
+}
+
+func (ms *myService) expensiveFunction(key string) string {
 	time.Sleep(5 * time.Second)
 	return fmt.Sprint("data-", key, ":success")
+}
+
+func (ms *myService) GetData(key string) string {
+	if ms.cacher != nil {
+		if cachedData := ms.cacher.get(key); cachedData != "" {
+			return cachedData
+		}
+	}
+
+	result := ms.expensiveFunction(key)
+	ms.cacher.set(key, result)
+
+	return result
 }
 
 type cache struct {
@@ -27,25 +44,26 @@ func (c *cache) get(key string) string {
 }
 
 func main() {
-	key := "mydata1"
-	start := time.Now()
-	result := expensiveFunction(key)
-	fmt.Println("expensive function called, duration:", time.Since(start))
-	fmt.Println(result)
-
 	// cache the result
 	cacher := &cache{
 		storage: map[string]string{},
 	}
-	cacher.set(key, result)
-	start = time.Now()
-
-	newResult := cacher.get(key)
-	if newResult == "" {
-		newResult = expensiveFunction(key)
+	service := &myService{
+		cacher: cacher,
 	}
 
+	key := "mydata1"
+
+	start := time.Now()
+	fmt.Println("calling expensive function")
+	result := service.GetData(key)
 	fmt.Println("expensive function called, duration:", time.Since(start))
+	fmt.Println(result)
+
+	start = time.Now()
+	fmt.Println("calling expensive function")
+	newResult := service.GetData(key)
+	fmt.Println("cachedexpensive function called, duration:", time.Since(start))
 	fmt.Println(newResult)
 
 }

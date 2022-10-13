@@ -42,7 +42,7 @@ func (m *restoUsecase) Order(request model.OrderMenuRequest) (model.Order, error
 			ID:         uuid.New().String(),
 			OrderCode:  orderProduct.OrderCode,
 			Quantity:   orderProduct.Quantity,
-			TotalPrice: menuData.Price & int64(orderProduct.Quantity),
+			TotalPrice: menuData.Price * int64(orderProduct.Quantity),
 			Status:     constant.ProductOrderStatusPreparing,
 		}
 	}

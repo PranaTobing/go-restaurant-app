@@ -63,6 +63,8 @@ func main() {
 	nameProducer(c)
 
 	// closed channel trigger a signal too
+	// it is okay if you don't close a channel
+	// it will be garbage collected by golang eventually
 	close(c)
 	<-quit
 }

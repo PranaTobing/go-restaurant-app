@@ -65,7 +65,7 @@ func (m *restoUsecase) Order(ctx context.Context, request model.OrderMenuRequest
 			ID:         uuid.New().String(),
 			OrderCode:  orderProduct.OrderCode,
 			Quantity:   orderProduct.Quantity,
-			TotalPrice: menuData.Price & int64(orderProduct.Quantity),
+			TotalPrice: menuData.Price * int64(orderProduct.Quantity),
 			Status:     constant.ProductOrderStatusPreparing,
 		}
 	}
